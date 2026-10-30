@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meesho Inventory Manager</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#172033;--muted:#687386;--line:#e5e9f2;--primary:#5b4bdb;--primary2:#eeeaff;--red:#c93648;--green:#16845b;--amber:#a86408}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:9px;padding:10px 13px;background:var(--primary);color:white;font-weight:600}button.secondary{background:#eef0f6;color:#263047}button.danger{background:#fff0f1;color:var(--red)}button.small{padding:6px 9px;font-size:12px}input,select,textarea{border:1px solid #d8deea;border-radius:8px;padding:10px;background:#fff;color:var(--ink);width:100%;min-width:0}label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}.app{display:grid;grid-template-columns:235px 1fr;min-height:100vh}.sidebar{background:#17182b;color:#fff;padding:22px 15px}.brand{font-size:19px;font-weight:800;margin:0 10px 6px}.brand span{color:#b9b1ff}.subbrand{font-size:12px;color:#aaaec6;margin:0 10px 28px}.nav{display:flex;flex-direction:column;gap:7px}.nav button{background:transparent;color:#c7c9dc;text-align:left;font-weight:600}.nav button.active,.nav button:hover{background:#34324f;color:#fff}.side-note{margin:30px 10px 0;font-size:11px;line-height:1.5;color:#a9adc3}.main{padding:24px;max-width:1600px;width:100%;margin:auto}.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:22px}.topbar h1{margin:0;font-size:25px}.muted{color:var(--muted);font-size:13px}.status{display:inline-flex;align-items:center;gap:7px;border-radius:20px;padding:7px 11px;background:#e7f7ef;color:var(--green);font-size:12px;font-weight:700}.dot{width:7px;height:7px;background:currentColor;border-radius:50%}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 2px 8px #17203305}.metric-label{font-size:12px;color:var(--muted);font-weight:700}.metric{font-size:27px;font-weight:800;margin:8px 0 3px;letter-spacing:-.5px}.metric-foot{font-size:12px;color:var(--muted)}.panel{margin-top:17px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:15px}.panel h2{font-size:17px;margin:0}.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.toolbar input{width:230px}.toolbar select{width:auto;min-width:130px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}th,td{padding:12px 13px;border-bottom:1px solid var(--line);text-align:left}th{background:#f8f9fc;color:#667085;font-size:11px;text-transform:uppercase;letter-spacing:.35px}tr:last-child td{border-bottom:0}.pill{display:inline-block;padding:5px 8px;border-radius:20px;font-size:11px;font-weight:700}.pill.ok{background:#e8f7ef;color:var(--green)}.pill.low{background:#fff4df;color:var(--amber)}.pill.out{background:#ffeaed;color:var(--red)}.empty{text-align:center;color:var(--muted);padding:28px}.hidden{display:none!important}.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.field.full{grid-column:1/-1}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.hint{font-size:12px;color:var(--muted);line-height:1.5}.notice{padding:12px 14px;border-radius:10px;background:#f0edff;color:#5144b8;font-size:13px;line-height:1.5;margin-bottom:14px}.warning{background:#fff6e6;color:#89580a}.danger-text{color:var(--red)}.section{display:none}.section.active{display:block}.two-col{display:grid;grid-template-columns:1.2fr .8fr;gap:15px}.file-label{display:inline-flex;align-items:center;gap:7px;border-radius:9px;padding:10px 13px;background:#eef0f6;color:#263047;font-weight:700;font-size:13px;cursor:pointer}.file-label input{display:none}.footer{margin:22px 0 4px;font-size:11px;color:var(--muted);line-height:1.5}.mini-stats{display:flex;gap:12px;flex-wrap:wrap}.mini-stats span{background:#f5f6fa;padding:7px 9px;border-radius:8px;font-size:12px}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two-col{grid-template-columns:1fr}.app{grid-template-columns:190px 1fr}.main{padding:18px}}
+@media(max-width:700px){.app{display:block}.sidebar{padding:13px}.brand{display:inline-block;margin-bottom:0}.subbrand{display:inline-block;margin:0 0 0 8px}.nav{flex-direction:row;overflow:auto;margin-top:12px}.nav button{white-space:nowrap;padding:9px}.side-note{display:none}.main{padding:13px}.topbar{align-items:flex-start;flex-direction:column}.grid{gap:9px}.card{padding:13px}.metric{font-size:22px}.form-grid{grid-template-columns:1fr 1fr}.toolbar input{width:100%}.toolbar{width:100%}.toolbar>*{flex:1}.field.full{grid-column:1/-1}}
+@media(max-width:420px){.grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+.auth{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}.authcard{width:100%;max-width:400px}.authcard input{margin-bottom:12px}.link{background:none;color:var(--primary);padding:0;font-size:12px;margin-top:12px}
+</style>
+</head>
+<body>
+<div id="auth" class="auth hidden"><div class="card authcard">
+<h2 style="margin:0 0 4px">Stock<span style="color:var(--primary)">Saathi</span></h2><div class="muted" style="margin-bottom:14px">Cloud Inventory Manager (Supabase) - login ki zaroorat nahi</div>
+<div id="cfgBox"><div class="notice">Supabase Dashboard → Project Settings → API se <b>Project URL</b> aur <b>anon public key</b> yahan paste karo.</div>
+<label>Project URL</label><input id="cUrl" placeholder="https://xxxx.supabase.co"><label>anon public key</label><input id="cKey" placeholder="eyJ... ya sb_publishable_...">
+<button onclick="saveCfg()">Save &amp; continue</button></div>
+<div id="authMsg" class="hint danger-text" style="margin-top:12px"></div></div></div>
+<div class="app hidden" id="appRoot">
+<aside class="sidebar">
+  <div class="brand">Stock<span>Saathi</span></div>
+  <div class="subbrand">Inventory Manager</div>
+  <nav class="nav">
+    <button class="active" data-tab="dashboard">▦ &nbsp; Dashboard</button>
+    <button data-tab="products">▤ &nbsp; Products</button>
+    <button data-tab="movements">⇄ &nbsp; Stock In / Out</button>
+    <button data-tab="challans">▣ &nbsp; Challans</button>
+    <button data-tab="bulk">⇧ &nbsp; Excel Bulk Upload</button>
+    <button data-tab="reports">▥ &nbsp; Reports & Backup</button>
+    <button data-tab="settings">⚙ &nbsp; Settings</button>
+  </nav>
+  <div class="side-note"><button class="secondary small" onclick="resetCfg()">Supabase keys badlo</button><p>☁ Data Supabase cloud me save hota hai, kisi bhi device se dikhega.</p></div>
+</aside>
+<main class="main">
+<header class="topbar">
+  <div><h1 id="pageTitle">Dashboard</h1><div class="muted" id="todayLabel"></div></div>
+  <div class="status" id="saveStatus"><span class="dot"></span> Auto-save ready</div>
+</header>
+
+<section class="section active" id="tab-dashboard">
+  <div class="grid">
+    <div class="card"><div class="metric-label">Total Products / SKUs</div><div class="metric" id="mProducts">0</div><div class="metric-foot">Unique SKU records</div></div>
+    <div class="card"><div class="metric-label">Units in Stock</div><div class="metric" id="mUnits">0</div><div class="metric-foot">Current available quantity</div></div>
+    <div class="card"><div class="metric-label">Low Stock</div><div class="metric" id="mLow">0</div><div class="metric-foot">At or below minimum level</div></div>
+    <div class="card"><div class="metric-label">Out of Stock</div><div class="metric" id="mOut">0</div><div class="metric-foot">Products needing replenishment</div></div>
+  </div>
+  <div class="two-col">
+    <div class="panel"><div class="panel-head"><h2>Low-stock / Out-of-stock alerts</h2><button class="secondary small" onclick="showTab('products')">View products</button></div><div id="alertTable"></div></div>
+    <div class="panel"><div class="panel-head"><h2>Quick actions</h2></div>
+      <div class="actions"><button onclick="openProductForm()">＋ Add product</button><button class="secondary" onclick="showTab('movements')">⇄ Record stock movement</button><button class="secondary" onclick="showTab('bulk')">⇧ Bulk upload</button><button class="secondary" onclick="downloadBackup()">↓ Full backup</button></div>
+      <div class="notice" style="margin-top:15px">Tip: Use a unique SKU for each sellable variant. Example: CLIP-BLK-01 and CLIP-PNK-01.</div>
+      <div class="mini-stats"><span>Stock value: <b id="mValue">₹0</b></span><span>Movements logged: <b id="mMoves">0</b></span></div>
+    </div>
+  </div>
+  <div class="panel"><div class="panel-head"><h2>Recent activity</h2><button class="secondary small" onclick="showTab('reports')">See reports</button></div><div id="recentActivity"></div></div>
+</section>
+
+<section class="section" id="tab-products">
+  <div class="panel">
+    <div class="panel-head"><h2>Product inventory</h2><div class="toolbar"><input id="productSearch" placeholder="Search name, SKU, category..." oninput="renderProducts()"><select id="stockFilter" onchange="renderProducts()"><option value="all">All stock levels</option><option value="ok">In stock</option><option value="low">Low stock</option><option value="out">Out of stock</option></select><button onclick="openProductForm()">＋ Add product</button></div></div>
+    <div class="hint" style="margin-bottom:12px">Click Edit to update a product. Stock changes are also recorded in the activity log.</div>
+    <div id="productsTable"></div>
+  </div>
+  <div class="panel hidden" id="productFormPanel">
+    <div class="panel-head"><h2 id="productFormTitle">Add product</h2><button class="secondary small" onclick="closeProductForm()">Close</button></div>
+    <form id="productForm">
+      <input type="hidden" id="editOriginalSku">
+      <div class="form-grid">
+        <div class="field"><label for="pSku">SKU / Product code *</label><input id="pSku" required placeholder="e.g. CLIP-BLK-01"></div>
+        <div class="field"><label for="pName">Product name *</label><input id="pName" required placeholder="Product name"></div>
+        <div class="field"><label for="pCategory">Category</label><input id="pCategory" placeholder="e.g. Home, Fashion"></div>
+        <div class="field"><label for="pVariant">Variant / Colour / Size</label><input id="pVariant" placeholder="e.g. Black, Large"></div>
+        <div class="field"><label for="pQty">Opening / current stock *</label><input id="pQty" type="number" min="0" step="1" required value="0"></div>
+        <div class="field"><label for="pMin">Minimum stock alert</label><input id="pMin" type="number" min="0" step="1" value="5"></div>
+        <div class="field"><label for="pCost">Purchase cost (₹)</label><input id="pCost" type="number" min="0" step="0.01" value="0"></div>
+        <div class="field"><label for="pPrice">Selling price (₹)</label><input id="pPrice" type="number" min="0" step="0.01" value="0"></div>
+        <div class="field"><label for="pSupplier">Supplier</label><input id="pSupplier" placeholder="Supplier name"></div>
+        <div class="field"><label for="pLocation">Storage location</label><input id="pLocation" placeholder="Rack / shelf / box"></div>
+        <div class="field"><label for="pStatus">Status</label><select id="pStatus"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+        <div class="field full"><label for="pNotes">Notes</label><textarea id="pNotes" rows="2" placeholder="Optional notes"></textarea></div>
+      </div>
+      <div class="actions"><button type="submit">Save product</button><button type="button" class="secondary" onclick="closeProductForm()">Cancel</button></div>
+    </form>
+  </div>
+</section>
+
+<section class="section" id="tab-movements">
+  <div class="panel">
+    <div class="panel-head"><h2>Record stock movement</h2></div>
+    <div class="notice">Use this form for stock received, sale/order dispatch, customer returns, damaged stock, or manual corrections. A movement is saved in the history.</div>
+    <form id="movementForm">
+      <div class="form-grid">
+        <div class="field"><label for="mvSku">Product / SKU *</label><select id="mvSku" required><option value="">Choose a product</option></select></div>
+        <div class="field"><label for="mvType">Movement type *</label><select id="mvType" required><option value="IN">Stock In / Purchase</option><option value="SALE">Sale / Dispatch (Stock Out)</option><option value="RETURN">Customer Return (Stock In)</option><option value="DAMAGE">Damaged / Lost (Stock Out)</option><option value="ADJUST">Manual adjustment</option></select></div>
+        <div class="field"><label for="mvQty">Quantity *</label><input id="mvQty" type="number" min="1" step="1" required value="1"></div>
+        <div class="field"><label for="mvDate">Date *</label><input id="mvDate" type="date" required></div>
+        <div class="field"><label for="mvReference">Order / reference ID</label><input id="mvReference" placeholder="Optional order or invoice ID"></div>
+        <div class="field"><label for="mvNotes">Notes / reason</label><input id="mvNotes" placeholder="Optional note"></div>
+      </div>
+      <div class="actions"><button type="submit">Save movement</button></div>
+    </form>
+  </div>
+  <div class="panel"><div class="panel-head"><h2>Movement history</h2><div class="toolbar"><input id="movementSearch" placeholder="Search SKU, type, reference..." oninput="renderMovements()"><button class="secondary" onclick="exportMovementsCSV()">Export history CSV</button></div></div><div id="movementsTable"></div></div>
+</section>
+
+<section class="section" id="tab-challans">
+  <div class="panel">
+    <div class="panel-head"><h2 id="chFormTitle">Create challan</h2></div>
+    <div class="notice">Challan save karte hi selected products ka stock automatically kam ho jata hai. Edit ya Delete karne par stock apne aap adjust ho jata hai. Product ka naam type bhi kar sakte ho ya list se select bhi (list me na ho to custom item banega, jiska stock adjust nahi hota). <span id="chWarn" class="danger-text"></span></div>
+    <form id="challanForm">
+      <div class="form-grid">
+        <div class="field"><label for="chNo">Challan No (auto)</label><input id="chNo" readonly></div>
+        <div class="field"><label for="chCompany">Company Name *</label><input id="chCompany" required placeholder="Company / party name"></div>
+        <div class="field"><label for="chDate">Challan Date *</label><input id="chDate" type="date" required></div>
+        <div class="field"><label for="chNotes">Notes</label><input id="chNotes" placeholder="Optional note"></div>
+      </div>
+      <h3 style="margin:18px 0 8px;font-size:15px">Products</h3>
+      <datalist id="chProducts"></datalist>
+      <div id="chItems"></div>
+      <div class="actions"><button type="button" class="secondary" onclick="addChRow()">+ Add product</button><span class="muted" id="chTotal"></span></div>
+      <div class="actions"><button type="submit" id="chSaveBtn">Save challan</button><button type="button" class="secondary hidden" id="chCancel" onclick="resetChForm()">Cancel edit</button></div>
+    </form>
+  </div>
+  <div class="panel"><div class="panel-head"><h2>Challan list</h2><div class="toolbar"><input id="challanSearch" placeholder="Search challan no, company, SKU..." oninput="renderChallans()"></div></div><div id="challansTable"></div></div>
+</section>
+
+<section class="section" id="tab-bulk">
+  <div class="panel">
+    <div class="panel-head"><h2>Excel / CSV bulk upload</h2></div>
+    <div class="notice">Upload .xlsx, .xls or .csv. The first row must contain column headings. Existing SKUs can be updated; new SKUs are added. Preview and validate the file before importing.</div>
+    <div class="actions" style="margin-bottom:15px"><button class="secondary" onclick="downloadTemplate()">↓ Download Excel template</button><label class="file-label">Choose Excel / CSV file<input id="bulkFile" type="file" accept=".xlsx,.xls,.csv"></label></div>
+    <div class="hint">Recognised headings (case-insensitive): SKU, Product Name, Category, Variant, Quantity, Minimum Stock, Purchase Price, Selling Price, Supplier, Location, Status, Notes. Alternative headings such as Product, Stock, Qty, Cost and Price are also recognised.</div>
+    <div id="bulkSummary" style="margin-top:15px"></div>
+    <div id="bulkPreview"></div>
+    <div class="actions hidden" id="bulkActions"><button id="importValidBtn" onclick="importBulk()">Import valid rows</button><button class="secondary" onclick="clearBulk()">Cancel upload</button></div>
+  </div>
+</section>
+
+<section class="section" id="tab-reports">
+  <div class="panel"><div class="panel-head"><h2>Reports & export</h2></div>
+    <div class="grid">
+      <div class="card"><div class="metric-label">Inventory value at cost</div><div class="metric" id="rCost">₹0</div><button class="secondary small" onclick="exportProductsCSV()">Export products CSV</button></div>
+      <div class="card"><div class="metric-label">Potential sales value</div><div class="metric" id="rSales">₹0</div><button class="secondary small" onclick="exportMovementsCSV()">Export movements CSV</button></div>
+      <div class="card"><div class="metric-label">Low stock items</div><div class="metric" id="rLow">0</div><button class="secondary small" onclick="showTab('products');document.getElementById('stockFilter').value='low';renderProducts()">View low stock</button></div>
+      <div class="card"><div class="metric-label">Saved activity records</div><div class="metric" id="rLog">0</div><button class="secondary small" onclick="exportActivityCSV()">Export activity CSV</button></div>
+    </div>
+  </div>
+  <div class="panel"><div class="panel-head"><h2>Backup & restore</h2></div>
+    <div class="notice warning"><b>Cloud storage:</b> Aapka data Supabase database me save hota hai (sirf aapke login ko dikhta hai). Phir bhi kabhi-kabhi JSON backup download karke rakho.</div>
+    <div class="actions"><button onclick="downloadBackup()">↓ Download full JSON backup</button><label class="file-label">Restore JSON backup<input id="restoreFile" type="file" accept=".json,application/json"></label><button class="secondary" onclick="exportProductsCSV()">Export products CSV</button><button class="secondary" onclick="exportMovementsCSV()">Export stock history CSV</button></div>
+    <p class="hint">The full JSON backup includes products, stock movement history, activity log and settings. Restoring replaces the current data, so download a backup of the current data first.</p>
+  </div>
+  <div class="panel"><div class="panel-head"><h2>Current inventory snapshot</h2><button class="secondary small" onclick="exportProductsCSV()">Export CSV</button></div><div id="reportTable"></div></div>
+</section>
+
+<section class="section" id="tab-settings">
+  <div class="panel"><div class="panel-head"><h2>Settings</h2></div>
+    <form id="settingsForm">
+      <div class="form-grid">
+        <div class="field"><label for="storeName">Business / store name</label><input id="storeName" placeholder="My Meesho Store"></div>
+        <div class="field"><label for="currency">Currency</label><select id="currency"><option value="INR">INR — Indian Rupee (₹)</option></select></div>
+        <div class="field"><label for="defaultMin">Default minimum stock for new products</label><input id="defaultMin" type="number" min="0" step="1" value="5"></div>
+      </div>
+      <div class="actions"><button type="submit">Save settings</button></div>
+    </form>
+  </div>
+  <div class="panel"><h2>Data & safety notes</h2><ul class="hint"><li>Har change turant Supabase me save hota hai (upar status dekho).</li><li>Data Row Level Security se protected hai: har user ko sirf apna data dikhta hai.</li><li>Excel import ke liye internet chahiye (SheetJS library). CSV bina library ke chalta hai.</li><li>Ye tool Meesho account se automatically connect nahi hota.</li></ul></div>
+  <div class="panel"><div class="panel-head"><h2 class="danger-text">Danger zone</h2></div><p class="hint">Delete all local inventory only if you intentionally want to start fresh. This action cannot be undone unless you have a backup.</p><button class="danger" onclick="resetAll()">Delete all local data</button></div>
+</section>
+<div class="footer">StockSaathi Inventory Manager • Supabase cloud edition • No Meesho account connection is included.</div>
+</main>
+</div>
+
+<script>
+const DBKEY='stocksaathi_inventory_v1';
+let db={products:[],challans:[],movements:[],activity:[],settings:{storeName:'',currency:'INR',defaultMin:5},updatedAt:null};
+let pendingBulk=[];
+const $=id=>document.getElementById(id);
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2});
+const today=()=>new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const FIXED_ID='00000000-0000-0000-0000-000000000001',CFG_K='stocksaathi_sb_cfg',SUPABASE_URL='',SUPABASE_KEY='';
+let sb=null,uid=null,queue=Promise.resolve(),snap={p:new Map(),c:new Map(),m:new Set(),a:new Set(),s:''};
+const pRow=p=>({user_id:uid,sku:p.sku,name:p.name,category:p.category||'',variant:p.variant||'',qty:Math.round(Number(p.qty))||0,min_qty:Math.round(Number(p.min))||0,cost:Number(p.cost)||0,price:Number(p.price)||0,supplier:p.supplier||'',location:p.location||'',status:p.status||'Active',notes:p.notes||''});
+const pFrom=r=>({sku:r.sku,name:r.name,category:r.category,variant:r.variant,qty:Number(r.qty),min:Number(r.min_qty),cost:Number(r.cost),price:Number(r.price),supplier:r.supplier,location:r.location,status:r.status,notes:r.notes});
+const mRow=m=>({user_id:uid,date:m.date,sku:m.sku,product:m.product||'',type:m.type,qty:Math.round(Number(m.qty))||0,delta:Math.round(Number(m.delta??m.qty))||0,before_qty:m.before??null,after_qty:m.after??null,reference:m.reference||'',notes:m.notes||''});
+const mFrom=r=>({id:r.id,date:r.date,sku:r.sku,product:r.product,type:r.type,qty:r.qty,delta:r.delta,before:r.before_qty,after:r.after_qty,reference:r.reference,notes:r.notes});
+const aRow=a=>({user_id:uid,date:a.date,action:a.action,sku:a.sku||'',details:a.details||''});
+const setStatus=t=>{$('saveStatus').innerHTML='<span class="dot"></span> '+t;};
+const hhmm=()=>new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+const authMsg=t=>{$('authMsg').textContent=t||'';};
+async function fetchAll(t,col,asc){let out=[],from=0;for(;;){const {data,error}=await sb.from(t).select('*').order(col,{ascending:asc}).range(from,from+999);if(error)throw error;out=out.concat(data);if(data.length<1000)break;from+=1000;}return out;}
+async function loadDB(){
+ let ch=[];challanReady=true;try{ch=await fetchAll('challans','challan_no',false);}catch(e){challanReady=false;}
+ const [p,m,a,s]=await Promise.all([fetchAll('products','sku',true),fetchAll('movements','id',false),fetchAll('activity','id',false),sb.from('settings').select('*').maybeSingle()]);
+ if(s.error)throw s.error;
+ db={products:p.map(pFrom),movements:m.map(mFrom),activity:a.map(r=>({id:r.id,date:r.date,action:r.action,sku:r.sku,details:r.details})),settings:s.data?{storeName:s.data.store_name||'',currency:'INR',defaultMin:s.data.default_min??5,nextChallan:s.data.next_challan||101}:{storeName:'',currency:'INR',defaultMin:5,nextChallan:101},challans:ch.map(chFrom),updatedAt:null};
+ snap={c:new Map(db.challans.map(x=>[x.no,JSON.stringify(chRowDB(x))])),p:new Map(db.products.map(x=>[x.sku,JSON.stringify(pRow(x))])),m:new Set(db.movements.map(x=>x.id)),a:new Set(db.activity.map(x=>x.id)),s:JSON.stringify(db.settings)};
+}
+function saveDB(msg='Saved'){setStatus('Saving…');queue=queue.then(syncNow).then(()=>setStatus('☁ '+msg+' · '+hhmm()),e=>{setStatus('⚠ Save failed');alert('Cloud save failed: '+(e.message||e));});return queue;}
+async function syncLog(t,arr,mk,set){
+ const fresh=arr.filter(x=>!x.id).reverse();
+ for(let i=0;i<fresh.length;i+=500){const ch=fresh.slice(i,i+500),{data,error}=await sb.from(t).insert(ch.map(mk)).select('id');if(error)throw error;data.forEach((r,j)=>{ch[j].id=r.id;set.add(r.id);});}
+ const have=new Set(arr.map(x=>x.id).filter(Boolean)),gone=[...set].filter(i=>!have.has(i));
+ for(let i=0;i<gone.length;i+=100){const part=gone.slice(i,i+100),{error}=await sb.from(t).delete().in('id',part);if(error)throw error;part.forEach(x=>set.delete(x));}
+}
+async function syncNow(){
+ if(!sb||!uid)return;
+ const up=[],cur=new Set();
+ for(const p of db.products){const r=pRow(p),j=JSON.stringify(r);cur.add(p.sku);if(snap.p.get(p.sku)!==j)up.push([r,j]);}
+ for(let i=0;i<up.length;i+=500){const ch=up.slice(i,i+500),{error}=await sb.from('products').upsert(ch.map(x=>x[0]),{onConflict:'user_id,sku'});if(error)throw error;ch.forEach(x=>snap.p.set(x[0].sku,x[1]));}
+ const del=[...snap.p.keys()].filter(k=>!cur.has(k));
+ for(let i=0;i<del.length;i+=100){const part=del.slice(i,i+100),{error}=await sb.from('products').delete().eq('user_id',uid).in('sku',part);if(error)throw error;part.forEach(k=>snap.p.delete(k));}
+ if(challanReady){const cu=[],cc=new Set();for(const c of db.challans){const r=chRowDB(c),j=JSON.stringify(r);cc.add(c.no);if(snap.c.get(c.no)!==j)cu.push([r,j]);}
+  if(cu.length){const {error}=await sb.from('challans').upsert(cu.map(x=>x[0]),{onConflict:'user_id,challan_no'});if(error)throw error;cu.forEach(x=>snap.c.set(x[0].challan_no,x[1]));}
+  const cd=[...snap.c.keys()].filter(k=>!cc.has(k));
+  if(cd.length){const {error}=await sb.from('challans').delete().eq('user_id',uid).in('challan_no',cd);if(error)throw error;cd.forEach(k=>snap.c.delete(k));}}
+ await syncLog('movements',db.movements,mRow,snap.m);
+ await syncLog('activity',db.activity,aRow,snap.a);
+ const sj=JSON.stringify(db.settings);
+ if(sj!==snap.s){const s=db.settings,{error}=await sb.from('settings').upsert({user_id:uid,store_name:s.storeName||'',currency:'INR',default_min:Math.round(Number(s.defaultMin))||0,...(challanReady?{next_challan:Number(s.nextChallan)||101}:{})});if(error)throw error;snap.s=sj;}
+}
+function showAuth(mode){$('auth').classList.remove('hidden');$('appRoot').classList.add('hidden');}
+async function boot(){
+ let c=null;try{c=JSON.parse(localStorage.getItem(CFG_K)||'null');}catch(e){}
+ c=c||{url:SUPABASE_URL,key:SUPABASE_KEY};
+ if(!window.supabase){showAuth('cfg');authMsg('Supabase library load nahi hui. Internet check karo aur page refresh karo.');return;}
+ if(!c.url||!c.key){showAuth('cfg');return;}
+ sb=window.supabase.createClient(c.url,c.key);
+ await enter({id:FIXED_ID,email:''});
+}
+async function enter(user){
+ uid=user.id;
+ try{await loadDB();}catch(e){showAuth('cfg');authMsg('Data load nahi hua: '+(e.message||e)+' - kya supabase_setup.sql run kiya? Keys sahi hain?');return;}
+ authMsg('');$('auth').classList.add('hidden');$('appRoot').classList.remove('hidden');renderAll();resetChForm();showTab('dashboard');setStatus('☁ Connected · '+hhmm());
+}
+function saveCfg(){const url=$('cUrl').value.trim().replace(/\/+$/,''),key=$('cKey').value.trim();if(!/^https:\/\/.+/.test(url)||key.length<20)return authMsg('Sahi Project URL aur anon key daalo.');localStorage.setItem(CFG_K,JSON.stringify({url,key}));authMsg('');boot();}
+function resetCfg(){localStorage.removeItem(CFG_K);authMsg('');showAuth('cfg');}
+function log(action,sku='',details=''){db.activity.unshift({date:new Date().toISOString(),action,sku,details});if(db.activity.length>5000)db.activity.length=5000;}
+function getProduct(sku){return db.products.find(p=>p.sku.toLowerCase()===String(sku).toLowerCase());}
+function stockStatus(p){if(Number(p.qty)<=0)return'out';if(Number(p.qty)<=Number(p.min||0))return'low';return'ok';}
+function statusPill(p){let s=stockStatus(p);return `<span class="pill ${s}">${s==='out'?'Out of stock':s==='low'?'Low stock':'In stock'}</span>`;}
+function tableOrEmpty(headers,rows){if(!rows.length)return'<div class="empty">No records yet.</div>';return '<div class="table-wrap"><table><thead><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.join('')+'</tbody></table></div>';}
+
+let chEditNo=null,challanReady=true,chQE=null;
+const nextChNo=()=>Math.max(101,Number(db.settings.nextChallan)||101,...db.challans.map(c=>c.no+1));
+const chRowDB=c=>({user_id:uid,challan_no:c.no,company:c.company,challan_date:c.date,notes:c.notes||'',items:c.items});
+const chFrom=r=>({no:r.challan_no,company:r.company,date:r.challan_date,notes:r.notes||'',items:Array.isArray(r.items)?r.items:[]});
+const chLabel=p=>`${p.sku} — ${p.name}`;
+const findProd=t=>{t=String(t||'').trim().toLowerCase();return t?db.products.find(p=>chLabel(p).toLowerCase()===t||p.sku.toLowerCase()===t||p.name.toLowerCase()===t):null;};
+function chHint(r){const t=r.querySelector('.chName').value.trim(),h=r.querySelector('.chHint'),p=findProd(t);h.textContent=!t?'':p?`Inventory product • SKU ${p.sku} • current stock ${p.qty}`:'Inventory me nahi mila: custom item (sirf challan me jayega, stock adjust nahi hoga)';h.style.color=(!t||p)?'':'#b45309';}
+function addChRow(text='',qty=1){const d=document.createElement('div');d.className='chrow';d.style.cssText='display:grid;grid-template-columns:1fr 110px 44px;gap:8px;margin-bottom:10px';d.innerHTML=`<input class="chName" list="chProducts" placeholder="Product name type karo ya list se select karo" autocomplete="off" value="${esc(text)}"><input class="chQty" type="number" min="1" step="1" value="${qty}" placeholder="Qty"><button type="button" class="secondary small" title="Remove" onclick="this.parentNode.remove();chTotal()">✕</button><div class="chHint muted" style="grid-column:1/-1;font-size:12px;margin-top:-4px"></div>`;$('chItems').appendChild(d);chTotal();}
+function chTotal(){let t=0,n=0;document.querySelectorAll('#chItems .chrow').forEach(r=>{chHint(r);if(r.querySelector('.chName').value.trim()){n++;t+=Number(r.querySelector('.chQty').value)||0;}});$('chTotal').textContent=n?`${n} product(s) • Total qty: ${t}`:'';}
+$('chItems').addEventListener('input',chTotal);$('chItems').addEventListener('change',chTotal);
+function collectChItems(){const map=new Map();for(const r of document.querySelectorAll('#chItems .chrow')){const t=r.querySelector('.chName').value.trim();if(!t)continue;const q=Number(r.querySelector('.chQty').value);if(!Number.isInteger(q)||q<1){alert('Quantity whole number aur 1 ya usse zyada honi chahiye. ('+t+')');return null;}const p=findProd(t),k=p?'S:'+p.sku:'C:'+t.toLowerCase(),e=map.get(k);if(e)e.qty+=q;else map.set(k,{sku:p?p.sku:'',name:p?p.name:t,qty:q});}if(!map.size){alert('Kam se kam ek product ka naam aur quantity daalo.');return null;}return [...map.values()];}
+function resetChForm(){chEditNo=null;$('challanForm').reset();$('chItems').innerHTML='';addChRow();$('chDate').value=today();$('chNo').value=nextChNo();$('chFormTitle').textContent='Create challan';$('chSaveBtn').textContent='Save challan';$('chCancel').classList.add('hidden');}
+function chMove(p,d,c,note){const before=Number(p.qty),after=before-d;p.qty=after;db.movements.unshift({date:new Date(c.date+'T12:00:00').toISOString(),sku:p.sku,product:p.name,type:d>0?'CHALLAN OUT':'CHALLAN RETURN',qty:Math.abs(d),delta:-d,before,after,reference:'Challan #'+c.no,notes:note});}
+$('challanForm').addEventListener('submit',e=>{e.preventDefault();
+ if(!challanReady)return alert('Challan table nahi mili. Supabase me naya supabase_setup.sql run karo aur page refresh karo.');
+ const company=$('chCompany').value.trim(),date=$('chDate').value;if(!company||!date)return alert('Company name aur date zaroori hai.');
+ const items=collectChItems();if(!items)return;
+ const old=chEditNo?db.challans.find(c=>c.no===chEditNo):null;
+ const oq={},nq={};(old?old.items:[]).forEach(i=>{if(i.sku)oq[i.sku]=i.qty;});items.forEach(i=>{if(i.sku)nq[i.sku]=i.qty;});
+ const skus=[...new Set([...Object.keys(oq),...Object.keys(nq)])];
+ for(const k of skus){const d=(nq[k]||0)-(oq[k]||0);if(d>0){const p=getProduct(k);if(!p)return alert(k+' inventory me nahi mila.');if(Number(p.qty)<d)return alert(`${k}: stock kam hai. Available ${p.qty}, chahiye ${d}.`);}}
+ const c={no:old?old.no:nextChNo(),company,date,notes:$('chNotes').value.trim(),items};
+ for(const k of skus){const d=(nq[k]||0)-(oq[k]||0);if(!d)continue;const p=getProduct(k);if(p)chMove(p,d,c,company+(old?' (challan edited)':''));}
+ if(old)Object.assign(old,c);else{db.challans.unshift(c);db.settings.nextChallan=c.no+1;}
+ chQE=null;log(old?'Challan edited':'Challan created','',`#${c.no} ${company}`);saveDB();renderAll();resetChForm();alert(`Challan #${c.no} ${old?'update':'save'} ho gaya. Stock inventory me adjust ho gaya.`);});
+function editChallan(no){const c=db.challans.find(x=>x.no===no);if(!c)return;showTab('challans');chQE=null;chEditNo=no;$('chNo').value=no;$('chCompany').value=c.company;$('chDate').value=c.date;$('chNotes').value=c.notes||'';$('chItems').innerHTML='';c.items.forEach(i=>{const p=i.sku&&getProduct(i.sku);addChRow(p?chLabel(p):i.name,i.qty);});$('chFormTitle').textContent='Edit challan #'+no;$('chSaveBtn').textContent='Update challan';$('chCancel').classList.remove('hidden');window.scrollTo(0,0);}
+function startQtyEdit(no,idx){chQE={no,idx};renderChallans();const el=$('qe_'+no+'_'+idx);if(el){el.focus();el.select();}}
+function cancelQtyEdit(){chQE=null;renderChallans();}
+function saveQtyEdit(no,idx){const c=db.challans.find(x=>x.no===no),it=c&&c.items[idx];if(!it)return;
+ if(chEditNo===no)return alert('Ye challan upar form me edit ho raha hai. Pehle use Update ya Cancel karo.');
+ const q=Number($('qe_'+no+'_'+idx).value);if(!Number.isInteger(q)||q<1)return alert('Quantity whole number aur 1 ya usse zyada honi chahiye.');
+ const d=q-Number(it.qty);if(!d){chQE=null;return renderChallans();}
+ if(it.sku){const p=getProduct(it.sku);if(d>0){if(!p)return alert(it.sku+' inventory me nahi mila.');if(Number(p.qty)<d)return alert(`${it.sku}: stock kam hai. Available ${p.qty}, chahiye ${d}.`);}if(p)chMove(p,d,c,c.company+' (challan qty edited)');}
+ const was=it.qty;it.qty=q;chQE=null;log('Challan qty edited','',`#${no} ${it.sku||it.name}: ${was} → ${q}`);saveDB();renderAll();
+ alert(`Challan #${no}: ${it.sku||it.name} quantity ${was} → ${q}.`+(it.sku?' Inventory stock adjust ho gaya.':' (Custom item hai, stock adjust nahi hua.)'));}
+function delChallan(no){const c=db.challans.find(x=>x.no===no);if(!c)return;if(!confirm(`Challan #${no} (${c.company}) delete karna hai?\nIs challan ka poora stock inventory me wapas add ho jayega.`))return;
+ const miss=[];for(const i of c.items){if(!i.sku)continue;const p=getProduct(i.sku);if(!p){miss.push(i.sku);continue;}chMove(p,-i.qty,c,c.company+' (challan deleted)');}
+ db.challans=db.challans.filter(x=>x.no!==no);chQE=null;if(chEditNo===no)resetChForm();log('Challan deleted','',`#${no} ${c.company}`);saveDB();renderAll();
+ alert(`Challan #${no} delete ho gaya, stock wapas add ho gaya.`+(miss.length?`\nDhyan: ${miss.join(', ')} ab inventory me nahi hai, isliye uska stock wapas nahi jod paaye.`:''));}
+function renderChallans(){
+ $('chWarn').textContent=challanReady?'':'(Challan table nahi mili: supabase_setup.sql run karo.)';
+ $('chProducts').innerHTML=db.products.map(p=>`<option value="${esc(chLabel(p))}">Stock ${p.qty}</option>`).join('');
+ if(chEditNo===null)$('chNo').value=nextChNo();
+ document.querySelectorAll('#chItems .chrow').forEach(chHint);
+ const q=($('challanSearch')?.value||'').toLowerCase();
+ const list=[...db.challans].sort((a,b)=>b.no-a.no).filter(c=>[c.no,c.company,c.notes,...c.items.map(i=>i.sku+' '+i.name)].join(' ').toLowerCase().includes(q));
+ const itemHtml=(c,i,x)=>{const nm=i.sku?`${esc(i.sku)} <span class="muted">${esc(i.name||'')}</span>`:`${esc(i.name)} <span class="muted">(custom)</span>`;const qc=(chQE&&chQE.no===c.no&&chQE.idx===x)?`<input id="qe_${c.no}_${x}" type="number" min="1" step="1" value="${i.qty}" style="width:80px;padding:4px 6px" onkeydown="if(event.key==='Enter')saveQtyEdit(${c.no},${x});if(event.key==='Escape')cancelQtyEdit()"> <button class="small" onclick="saveQtyEdit(${c.no},${x})">Save</button> <button class="secondary small" onclick="cancelQtyEdit()">✕</button>`:`<b>${i.qty}</b> <button class="secondary small" title="Quantity edit karo" onclick="startQtyEdit(${c.no},${x})">Edit</button>`;return `<div style="margin-bottom:5px">${nm} × ${qc}</div>`;};
+ $('challansTable').innerHTML=tableOrEmpty(['Challan No','Date','Company','Products × Quantity','Total Qty','Actions'],list.map(c=>`<tr><td><b>#${c.no}</b></td><td>${esc(String(c.date).split('-').reverse().join('-'))}</td><td>${esc(c.company)}${c.notes?`<br><span class="muted">${esc(c.notes)}</span>`:''}</td><td>${c.items.map((i,x)=>itemHtml(c,i,x)).join('')}</td><td>${c.items.reduce((a,i)=>a+Number(i.qty),0)}</td><td style="white-space:nowrap"><button class="secondary small" onclick="editChallan(${c.no})">Edit</button> <button class="danger small" onclick="delChallan(${c.no})">Delete</button></td></tr>`));}
+function showTab(name){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));$('tab-'+name).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));const titles={dashboard:'Dashboard',products:'Products',movements:'Stock In / Out',bulk:'Excel Bulk Upload',reports:'Reports & Backup',settings:'Settings',challans:'Challans'};$('pageTitle').textContent=titles[name];if(name==='products')renderProducts();if(name==='movements'){fillSkuSelect();renderMovements();}if(name==='reports')renderReports();if(name==='settings')fillSettings();if(name==='challans')renderChallans();window.scrollTo(0,0);}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+function renderAll(){renderChallans();renderDashboard();renderProducts();fillSkuSelect();renderMovements();renderReports();fillSettings();}
+function renderDashboard(){
+const ps=db.products,units=ps.reduce((a,p)=>a+Number(p.qty||0),0),low=ps.filter(p=>stockStatus(p)==='low'),out=ps.filter(p=>stockStatus(p)==='out'),value=ps.reduce((a,p)=>a+Number(p.qty||0)*Number(p.cost||0),0);
+$('mProducts').textContent=ps.length;$('mUnits').textContent=units.toLocaleString('en-IN');$('mLow').textContent=low.length;$('mOut').textContent=out.length;$('mValue').textContent=money(value);$('mMoves').textContent=db.movements.length;
+const alerts=[...out,...low].slice(0,10);$('alertTable').innerHTML=tableOrEmpty(['SKU / Product','Qty','Min.','Status'],alerts.map(p=>`<tr><td><b>${esc(p.sku)}</b><br><span class="muted">${esc(p.name)}</span></td><td>${p.qty}</td><td>${p.min}</td><td>${statusPill(p)}</td></tr>`));
+$('recentActivity').innerHTML=tableOrEmpty(['Date','Action','SKU','Details'],db.activity.slice(0,8).map(a=>`<tr><td>${esc(new Date(a.date).toLocaleString())}</td><td>${esc(a.action)}</td><td>${esc(a.sku)}</td><td>${esc(a.details)}</td></tr>`));
+}
+function renderProducts(){
+const q=($('productSearch')?.value||'').toLowerCase(),f=$('stockFilter')?.value||'all';
+const ps=db.products.filter(p=>([p.sku,p.name,p.category,p.variant,p.supplier,p.location].join(' ').toLowerCase().includes(q))&&(f==='all'||stockStatus(p)===f));
+$('productsTable').innerHTML=tableOrEmpty(['SKU','Product','Category / Variant','Qty','Min.','Cost','Selling price','Status','Actions'],ps.map(p=>`<tr><td><b>${esc(p.sku)}</b></td><td>${esc(p.name)}<br><span class="muted">${esc(p.supplier||'')}</span></td><td>${esc(p.category||'—')}<br><span class="muted">${esc(p.variant||'')}</span></td><td><b>${Number(p.qty)}</b></td><td>${Number(p.min||0)}</td><td>${money(p.cost)}</td><td>${money(p.price)}</td><td>${statusPill(p)}</td><td><button class="secondary small" onclick="editProduct('${encodeURIComponent(p.sku)}')">Edit</button> <button class="danger small" onclick="deleteProduct('${encodeURIComponent(p.sku)}')">Delete</button></td></tr>`));
+}
+function openProductForm(p=null){showTab('products');$('productFormPanel').classList.remove('hidden');$('productFormTitle').textContent=p?'Edit product':'Add product';$('productForm').reset();$('editOriginalSku').value=p?p.sku:'';$('pSku').value=p?.sku||'';$('pSku').readOnly=!!p;$('pName').value=p?.name||'';$('pCategory').value=p?.category||'';$('pVariant').value=p?.variant||'';$('pQty').value=p?.qty??0;$('pMin').value=p?.min??db.settings.defaultMin??5;$('pCost').value=p?.cost??0;$('pPrice').value=p?.price??0;$('pSupplier').value=p?.supplier||'';$('pLocation').value=p?.location||'';$('pStatus').value=p?.status||'Active';$('pNotes').value=p?.notes||'';$('productFormPanel').scrollIntoView({behavior:'smooth',block:'start'});}
+function closeProductForm(){$('productFormPanel').classList.add('hidden');$('pSku').readOnly=false;}
+function editProduct(encoded){const sku=decodeURIComponent(encoded),p=getProduct(sku);if(p)openProductForm(p);}
+$('productForm').addEventListener('submit',e=>{e.preventDefault();const original=$('editOriginalSku').value,sku=$('pSku').value.trim();if(!sku){alert('SKU is required.');return;}const existing=getProduct(sku);if(existing&&sku.toLowerCase()!==original.toLowerCase()){alert('This SKU already exists. Use a unique SKU.');return;}
+const p={sku,name:$('pName').value.trim(),category:$('pCategory').value.trim(),variant:$('pVariant').value.trim(),qty:Math.max(0,Math.round(Number($('pQty').value)||0)),min:Math.max(0,Math.round(Number($('pMin').value||0))),cost:Number($('pCost').value||0),price:Number($('pPrice').value||0),supplier:$('pSupplier').value.trim(),location:$('pLocation').value.trim(),status:$('pStatus').value,notes:$('pNotes').value.trim()};
+if(original){const old=getProduct(original);if(old&&Number(old.qty)!==p.qty){db.movements.unshift({date:new Date().toISOString(),sku,product:p.name,type:'ADJUST',qty:Math.abs(p.qty-Number(old.qty)),delta:p.qty-Number(old.qty),before:Number(old.qty),after:p.qty,reference:'Product edit',notes:'Quantity changed through product edit'});}const i=db.products.findIndex(x=>x.sku.toLowerCase()===original.toLowerCase());if(i>=0)db.products[i]=p;log('Product updated',sku,p.name);}else{if(existing){alert('SKU already exists.');return;}db.products.push(p);log('Product added',sku,p.name);}
+saveDB();closeProductForm();renderAll();});
+function deleteProduct(encoded){const sku=decodeURIComponent(encoded),p=getProduct(sku);if(!p)return;if(!confirm(`Delete ${p.name} (${p.sku}) from product list? Existing movement history will remain.`))return;db.products=db.products.filter(x=>x.sku.toLowerCase()!==sku.toLowerCase());log('Product deleted',sku,p.name);saveDB();renderAll();}
+function fillSkuSelect(){const s=$('mvSku'),old=s.value;s.innerHTML='<option value="">Choose a product</option>'+db.products.map(p=>`<option value="${esc(p.sku)}">${esc(p.sku)} — ${esc(p.name)} (qty ${p.qty})</option>`).join('');if(getProduct(old))s.value=old;}
+$('mvDate').value=today();
+$('movementForm').addEventListener('submit',e=>{e.preventDefault();const sku=$('mvSku').value,p=getProduct(sku),type=$('mvType').value,qty=Number($('mvQty').value);if(!p)return alert('Choose a product first.');if(!Number.isInteger(qty)||qty<1)return alert('Quantity must be a whole number greater than zero.');
+let delta=qty;if(type==='SALE'||type==='DAMAGE')delta=-qty;if(type==='ADJUST'){const raw=prompt('Manual adjustment: enter quantity change. Use positive to add, negative to remove. Example: -3');if(raw===null)return;delta=Number(raw);if(!Number.isInteger(delta)||delta===0)return alert('Enter a non-zero whole number.');}
+const before=Number(p.qty),after=before+delta;if(after<0)return alert(`Not enough stock. Available: ${before}. Stock cannot go below zero.`);
+p.qty=after;const movement={date:new Date($('mvDate').value+'T12:00:00').toISOString(),sku,product:p.name,type,qty:Math.abs(delta),delta,before,after,reference:$('mvReference').value.trim(),notes:$('mvNotes').value.trim()};db.movements.unshift(movement);log('Stock '+type,sku,`${before} → ${after}; ${movement.notes||movement.reference||''}`);saveDB();$('movementForm').reset();$('mvDate').value=today();$('mvQty').value=1;renderAll();alert(`Stock updated. New quantity for ${sku}: ${after}`);});
+function renderMovements(){const q=($('movementSearch')?.value||'').toLowerCase();const ms=db.movements.filter(m=>[m.sku,m.product,m.type,m.reference,m.notes].join(' ').toLowerCase().includes(q));$('movementsTable').innerHTML=tableOrEmpty(['Date','SKU / Product','Type','Change','Before → After','Reference','Notes'],ms.slice(0,1000).map(m=>`<tr><td>${esc(new Date(m.date).toLocaleDateString())}</td><td><b>${esc(m.sku)}</b><br><span class="muted">${esc(m.product||'')}</span></td><td>${esc(m.type)}</td><td class="${Number(m.delta)<0?'danger-text':''}">${Number(m.delta)>0?'+':''}${Number(m.delta??m.qty)}</td><td>${m.before??'—'} → ${m.after??'—'}</td><td>${esc(m.reference||'—')}</td><td>${esc(m.notes||'—')}</td></tr>`));}
+function renderReports(){const ps=db.products;const cost=ps.reduce((a,p)=>a+Number(p.qty||0)*Number(p.cost||0),0),sales=ps.reduce((a,p)=>a+Number(p.qty||0)*Number(p.price||0),0);$('rCost').textContent=money(cost);$('rSales').textContent=money(sales);$('rLow').textContent=ps.filter(p=>stockStatus(p)==='low'||stockStatus(p)==='out').length;$('rLog').textContent=db.activity.length;$('reportTable').innerHTML=tableOrEmpty(['SKU','Product','Qty','Purchase cost','Stock cost value','Selling price','Potential sales value'],ps.map(p=>`<tr><td>${esc(p.sku)}</td><td>${esc(p.name)}</td><td>${p.qty}</td><td>${money(p.cost)}</td><td>${money(Number(p.qty)*Number(p.cost))}</td><td>${money(p.price)}</td><td>${money(Number(p.qty)*Number(p.price))}</td></tr>`));}
+function fillSettings(){$('storeName').value=db.settings.storeName||'';$('defaultMin').value=db.settings.defaultMin??5;$('currency').value=db.settings.currency||'INR';}
+$('settingsForm').addEventListener('submit',e=>{e.preventDefault();db.settings={nextChallan:db.settings.nextChallan,storeName:$('storeName').value.trim(),defaultMin:Number($('defaultMin').value||0),currency:'INR'};log('Settings updated','',db.settings.storeName);saveDB();alert('Settings saved.');});
+function csvEscape(v){const s=String(v??'');return '"'+s.replace(/"/g,'""')+'"';}
+function downloadBlob(content,type,filename){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function downloadBackup(){downloadBlob(JSON.stringify(db,null,2),'application/json',`stocksaathi-backup-${today()}.json`);}
+function exportProductsCSV(){const cols=['SKU','Product Name','Category','Variant','Quantity','Minimum Stock','Purchase Price','Selling Price','Supplier','Location','Status','Notes'];const rows=db.products.map(p=>[p.sku,p.name,p.category,p.variant,p.qty,p.min,p.cost,p.price,p.supplier,p.location,p.status,p.notes]);downloadBlob('\ufeff'+[cols,...rows].map(r=>r.map(csvEscape).join(',')).join('\r\n'),'text/csv;charset=utf-8',`inventory-products-${today()}.csv`);}
+function exportMovementsCSV(){const cols=['Date','SKU','Product','Type','Quantity Change','Before','After','Reference','Notes'];const rows=db.movements.map(m=>[m.date,m.sku,m.product,m.type,m.delta??m.qty,m.before,m.after,m.reference,m.notes]);downloadBlob('\ufeff'+[cols,...rows].map(r=>r.map(csvEscape).join(',')).join('\r\n'),'text/csv;charset=utf-8',`stock-movements-${today()}.csv`);}
+function exportActivityCSV(){const cols=['Date','Action','SKU','Details'];const rows=db.activity.map(a=>[a.date,a.action,a.sku,a.details]);downloadBlob('\ufeff'+[cols,...rows].map(r=>r.map(csvEscape).join(',')).join('\r\n'),'text/csv;charset=utf-8',`inventory-activity-${today()}.csv`);}
+function downloadTemplate(){const data=[['SKU','Product Name','Category','Variant','Quantity','Minimum Stock','Purchase Price','Selling Price','Supplier','Location','Status','Notes'],['CLIP-BLK-01','Claw Clip Black','Accessories','Black',25,5,35,99,'Supplier name','Rack A','Active','Sample row — replace or delete']];if(window.XLSX){const ws=XLSX.utils.aoa_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Products');XLSX.writeFile(wb,'inventory-bulk-upload-template.xlsx');}else downloadBlob('\ufeff'+data.map(r=>r.map(csvEscape).join(',')).join('\r\n'),'text/csv;charset=utf-8','inventory-bulk-upload-template.csv');}
+const aliases={sku:['sku','product code','item code','seller sku','product sku'],name:['product name','name','product','item name','title'],category:['category','product category'],variant:['variant','colour','color','size','variant colour'],qty:['quantity','qty','stock','current stock','opening stock','available quantity'],min:['minimum stock','min stock','reorder level','minimum quantity','min'],cost:['purchase price','purchase cost','cost','cost price','buying price'],price:['selling price','sale price','price','mrp'],supplier:['supplier','vendor','supplier name'],location:['location','storage location','rack'],status:['status','product status'],notes:['notes','note','remarks','description']};
+function normKey(k){return String(k??'').toLowerCase().trim().replace(/[_-]+/g,' ').replace(/\s+/g,' ');}
+function rowToProduct(row){const norm={};Object.keys(row).forEach(k=>norm[normKey(k)]=row[k]);const o={};for(const [field,opts] of Object.entries(aliases)){const key=Object.keys(norm).find(k=>opts.includes(k));o[field]=key!==undefined?norm[key]:'';}o.sku=String(o.sku??'').trim();o.name=String(o.name??'').trim();o.category=String(o.category??'').trim();o.variant=String(o.variant??'').trim();o.qty=o.qty===''?0:Number(o.qty);o.min=o.min===''?Number(db.settings.defaultMin||5):Number(o.min);o.cost=o.cost===''?0:Number(o.cost);o.price=o.price===''?0:Number(o.price);o.supplier=String(o.supplier??'').trim();o.location=String(o.location??'').trim();o.status=String(o.status||'Active').trim();o.notes=String(o.notes??'').trim();o.errors=[];if(!o.sku)o.errors.push('Missing SKU');if(!o.name)o.errors.push('Missing product name');if(!Number.isFinite(o.qty)||o.qty<0||!Number.isInteger(o.qty))o.errors.push('Quantity must be a whole number ≥ 0');if(!Number.isFinite(o.min)||o.min<0)o.errors.push('Minimum stock invalid');if(!Number.isFinite(o.cost)||o.cost<0)o.errors.push('Purchase price invalid');if(!Number.isFinite(o.price)||o.price<0)o.errors.push('Selling price invalid');return o;}
+$('bulkFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{let rows;if(file.name.toLowerCase().endsWith('.csv')){const text=await file.text();rows=parseCSV(text);}else{if(!window.XLSX)throw new Error('Excel library could not load. Check internet connection, or save the file as CSV and upload again.');const buf=await file.arrayBuffer(),wb=XLSX.read(buf,{type:'array'});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});}if(!rows.length)throw new Error('No data rows found. Check the first sheet and headings.');pendingBulk=rows.map((r,i)=>({...rowToProduct(r),rowNo:i+2}));const seen=new Set();pendingBulk.forEach(p=>{const k=p.sku.toLowerCase();if(k&&seen.has(k))p.errors.push('Duplicate SKU in uploaded file');if(k)seen.add(k);});renderBulkPreview();}catch(err){alert('Upload error: '+err.message);} });
+function parseCSV(text){const rows=[];let row=[],field='',quoted=false;for(let i=0;i<text.length;i++){const c=text[i];if(quoted){if(c==='"'&&text[i+1]==='"'){field+='"';i++;}else if(c==='"')quoted=false;else field+=c;}else{if(c==='"')quoted=true;else if(c===','){row.push(field);field='';}else if(c==='\n'){row.push(field.replace(/\r$/,''));if(row.some(x=>x!==''))rows.push(row);row=[];field='';}else field+=c;}}row.push(field.replace(/\r$/,''));if(row.some(x=>x!==''))rows.push(row);if(!rows.length)return[];const headers=rows.shift().map(h=>String(h).replace(/^\ufeff/,''));return rows.map(r=>Object.fromEntries(headers.map((h,i)=>[h,r[i]??''])));}
+function renderBulkPreview(){const valid=pendingBulk.filter(p=>!p.errors.length),invalid=pendingBulk.length-valid.length;$('bulkSummary').innerHTML=`<div class="mini-stats"><span>Rows read: <b>${pendingBulk.length}</b></span><span>Valid rows: <b>${valid.length}</b></span><span class="${invalid?'danger-text':''}">Rows with errors: <b>${invalid}</b></span></div>`;$('bulkPreview').innerHTML=tableOrEmpty(['Row','SKU','Product name','Qty','Cost','Selling price','Import action','Validation'],pendingBulk.slice(0,300).map(p=>{const old=getProduct(p.sku);return `<tr><td>${p.rowNo}</td><td>${esc(p.sku)}</td><td>${esc(p.name)}</td><td>${esc(p.qty)}</td><td>${money(p.cost)}</td><td>${money(p.price)}</td><td>${old?'Update existing':'Add new'}</td><td>${p.errors.length?'<span class="pill out">'+esc(p.errors.join('; '))+'</span>':'<span class="pill ok">Ready</span>'}</td></tr>`;}));$('bulkActions').classList.toggle('hidden',!pendingBulk.length);$('importValidBtn').textContent=`Import ${valid.length} valid rows`;$('importValidBtn').disabled=!valid.length;if(pendingBulk.length>300)$('bulkSummary').innerHTML+=`<p class="hint">Showing first 300 rows in preview; all ${pendingBulk.length} rows will be validated.</p>`;}
+function importBulk(){const valid=pendingBulk.filter(p=>!p.errors.length);if(!valid.length)return alert('No valid rows to import.');const duplicates=valid.filter(p=>getProduct(p.sku));const msg=`Import ${valid.length} valid rows? ${valid.length-duplicates.length} new products and ${duplicates.length} existing products will be updated. Existing SKU quantities will be set to the quantity in the file.`;if(!confirm(msg))return;valid.forEach(p=>{const product={sku:p.sku,name:p.name,category:p.category,variant:p.variant,qty:p.qty,min:p.min,cost:p.cost,price:p.price,supplier:p.supplier,location:p.location,status:p.status||'Active',notes:p.notes};const old=getProduct(p.sku);if(old){if(Number(old.qty)!==Number(product.qty))db.movements.unshift({date:new Date().toISOString(),sku:p.sku,product:p.name,type:'BULK_UPDATE',qty:Math.abs(product.qty-old.qty),delta:product.qty-old.qty,before:Number(old.qty),after:product.qty,reference:'Excel bulk upload',notes:'Quantity set from imported file'});Object.assign(old,product);log('Bulk product updated',p.sku,p.name);}else{db.products.push(product);log('Bulk product added',p.sku,p.name);}});saveDB();pendingBulk=[];$('bulkFile').value='';$('bulkPreview').innerHTML='';$('bulkSummary').innerHTML='<div class="notice">Import complete. Products and stock have been saved.</div>';$('bulkActions').classList.add('hidden');renderAll();}
+function clearBulk(){pendingBulk=[];$('bulkFile').value='';$('bulkPreview').innerHTML='';$('bulkSummary').innerHTML='';$('bulkActions').classList.add('hidden');}
+$('restoreFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!x||!Array.isArray(x.products)||!Array.isArray(x.movements)||!Array.isArray(x.activity))throw new Error('This does not look like a valid StockSaathi full backup.');if(!confirm(`Restore backup containing ${x.products.length} products? This will replace the current data. Download a backup of current data first if needed.`))return;db={products:x.products,challans:Array.isArray(x.challans)?x.challans:[],movements:x.movements.map(({id,...m})=>m),activity:x.activity.map(({id,...a})=>a),settings:x.settings||{storeName:'',currency:'INR',defaultMin:5},updatedAt:x.updatedAt||null};saveDB('Backup restored');renderAll();alert('Backup restored successfully.');}catch(err){alert('Restore failed: '+err.message);}finally{e.target.value='';}});
+function resetAll(){if(!confirm('Delete ALL products, movements, activity and settings from this browser? This cannot be undone without a backup.'))return;if(!confirm('Final confirmation: permanently delete local inventory data?'))return;db={products:[],challans:[],movements:[],activity:[],settings:{storeName:'',currency:'INR',defaultMin:5},updatedAt:null};saveDB('Data reset');renderAll();showTab('dashboard');}
+$('todayLabel').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+boot();
+</script>
+</body>
+</html>
